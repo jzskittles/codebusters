@@ -1,5 +1,6 @@
 from Tkinter import *
 import string
+import numpy as np
 
 master = Tk()
 master.title("Code Busters Solver")
@@ -207,12 +208,142 @@ def affine():
                                     count+=1
                                     break
                     labell.set("missing a")
-                print "missing a or b"
         else:
             labell.set("cannot solve, put in solution")
 
-def hill():
-    labell.set("")
+def hill():    
+    del solnum[:]
+    del phrasenum[:]
+    del keynum[:]
+    
+    for letter in phrase.get():
+        phrasenum.append(values[letter])
+    for letter in key.get():
+        keynum.append(values[letter])
+    
+    if v.get() != 2:
+        solution.set("")
+        labell.set("")
+
+        if v.get() == 1:
+            keymatrix = []
+            if len(keynum) == 4:
+                keymatrix = [[keynum[0],keynum[1]],
+                            [keynum[2],keynum[3]]]
+                phrasematrix = []
+                lettermatrix = []
+                count = 0
+                for letter in phrasenum:
+                    if count%2==0:
+                        lettermatrix = []
+                        lettermatrix.append(letter)
+                        count+=1
+                        if count == len(phrasenum):
+                            lettermatrix.append(25)
+                            phrasematrix.append(lettermatrix)
+                    else:
+                        lettermatrix.append(letter)
+                        phrasematrix.append(lettermatrix)
+                        count+=1
+                #print phrasematrix
+                #print keymatrix
+            elif len(keynum) == 9:
+                keymatrix = [[keynum[0],keynum[1],keynum[2]],
+                            [keynum[3],keynum[4],keynum[5]],
+                            [keynum[6],keynum[7],keynum[8]]]
+                phrasematrix = []
+                lettermatrix = []
+                count = 0
+                for letter in phrasenum:
+                    if count%3==0:
+                        lettermatrix.append(letter)
+                        count+=1
+                        if count == len(phrasenum):
+                            lettermatrix.append(25)
+                            lettermatrix.append(25)
+                            phrasematrix.append(lettermatrix)
+                    elif count%3==1:
+                        lettermatrix.append(letter)
+                        count+=1
+                        if count == len(phrasenum):
+                            lettermatrix.append(25)
+                            phrasematrix.append(lettermatrix)
+                    else:
+                        lettermatrix.append(letter)
+                        phrasematrix.append(lettermatrix)
+                        count+=1
+                        lettermatrix = []
+            else:
+                labell.set("Incorrect number of characters for key!!")
+            sol = []
+            for subpart in phrasematrix:
+                sol.append(np.matmul(keymatrix, subpart).tolist())
+            for section in sol:
+                for item in section:
+                    item = item%26
+                    for let in values:
+                        if values[let] == item:
+                            solution.set(solution.get()+let)
+            
+            
+            """for letter in phrasenum:
+                if v.get() == 0:
+                    solnum.append((letter-keynum[count%(len(keynum))])%26)
+                if v.get() == 1:
+                    solnum.append((letter+keynum[count%(len(keynum))])%26)
+                count+=1
+            solution.set("")
+
+            for letter in solnum:
+                for let in values:
+                    if values[let] == letter:
+                        solution.set(solution.get()+let)
+        else:
+            for letter in solution.get():
+                solnum.append(values[letter])
+            if len(solution.get()) != 0:
+                if len(phrasenum) == 0:
+                    labell.set("use decode function instead")
+                    print "missing phrase"
+                if len(keynum) == 0:
+                    count=0
+                    for letter in phrasenum:
+                        keynum.append((solnum[count]-letter)%26)
+                        count+=1
+                    labell.set("missing key")
+                    for letter in keynum:
+                        for let in values:
+                            if values[let] == letter:
+                                key.set(key.get()+let)
+                    print "missing key"
+            else:
+                labell.set("cannot solve, put in solution")"""
+
+def affine():
+    del solnum[:]
+    del phrasenum[:]
+    affineinverse = {1:1, 3:9, 5:21, 7:15, 9:3, 11:19, 15:7, 17:23, 19:11, 21:5, 23:17, 25:25}
+    
+    for letter in phrase.get():
+        phrasenum.append(values[letter])
+
+    if v.get() != 2:
+        solution.set("")
+        labell.set("")
+
+        aa = int(affinea.get() or 0)
+        bb = int(affineb.get() or 0)
+        for letter in phrasenum:
+            if v.get() == 0:
+                for inv in affineinverse:
+                    if inv == aa:
+                        solnum.append((affineinverse[inv]*(letter-bb))%26)
+            if v.get() == 1:
+                solnum.append((aa*letter+bb)%26)
+        for letter in solnum:
+            for let in values:
+                if values[let] == letter:
+                    solution.set(solution.get()+let)
     print "solve hill"
 
 container = Frame(master)
